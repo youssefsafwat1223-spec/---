@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الاستعلام عن بيانات الطلاب</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .header-bar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 2rem;
+        }
+
+        .header-text h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .search-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 16px 120px 16px 20px;
+            font-size: 1.05rem;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #fff;
+        }
+
+        .search-box input:focus {
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .search-box button {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .search-box button:hover {
+            transform: translateY(-50%) translateX(-2px);
+            box-shadow: 0 4px 12px rgba(42, 82, 152, 0.3);
+        }
+
+        .search-box button:active {
+            transform: translateY(-50%) scale(0.98);
+        }
+
+        /* Autocomplete Suggestions */
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dfe6e9;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            margin-top: -1px;
+        }
+
+        .suggestion-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f3f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9fa;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+
+        .suggestion-id {
+            color: #74b9ff;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .suggestion-details {
+            color: #636e72;
+            font-size: 0.85rem;
+            margin-top: 3px;
+        }
+
+        .search-hint {
+            text-align: center;
+            color: #636e72;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        .stats-bar {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2a5298;
+        }
+
+        .stat-label {
+            color: #636e72;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f0f3f5;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 5px;
+        }
+
+        .results-count {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px 30px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border-right: 4px solid #2a5298;
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(-3px);
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f3f5;
+        }
+
+        .student-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .student-id-badge {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1.05rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .no-results h3 {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .no-results p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            border: 2px solid #feb2b2;
+            color: #c53030;
+            padding: 18px 20px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .header-text h1 {
+                font-size: 1.4rem;
+            }
+
+            .search-section {
+                padding: 25px 20px;
+            }
+
+            .search-box input {
+                padding: 14px 110px 14px 16px;
+                font-size: 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <div class="header-content">
+            <div class="logo">🎓</div>
+            <div class="header-text">
+                <h1>نظام الاستعلام عن بيانات الطلاب</h1>
+                <p>ابحث عن معلومات الطالب بسهولة وسرعة</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-section">
+            <div class="search-title">
+                🔍 ابحث عن طالب
+            </div>
+            
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="ادخل اسم الطالب أو رقم الطالب..."
+                        autocomplete="off"
+                    >
+                    <button onclick="searchStudent()">بحث</button>
+                    <div class="suggestions" id="suggestions"></div>
+                </div>
+                <div class="search-hint">
+                    ابدأ بالكتابة وستظهر لك الاقتراحات تلقائياً
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalStudents">0</div>
+                    <div class="stat-label">إجمالي الطلاب</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalClasses">0</div>
+                    <div class="stat-label">عدد الصفوف</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: #636e72; font-size: 1.1rem;">جاري البحث...</p>
+        </div>
+
+        <div class="results" id="results">
+            <div class="results-header">
+                <span class="results-count" id="resultsCount"></span>
+            </div>
+            <div id="resultsContainer"></div>
+        </div>
+
+        <div class="no-results" id="noResults">
+            <div class="no-results-icon">🔍</div>
+            <h3>لم يتم العثور على نتائج</h3>
+            <p>حاول البحث باسم أو رقم مختلف</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2025 نظام استعلام الطلاب - جميع الحقوق محفوظة
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://n8n.srv1096584.hstgr.cloud/webhook/student_get';
+        let allStudents = [];
+        let suggestionsTimeout;
+
+        // تحميل البيانات عند فتح الصفحة
+        async function loadAllStudents() {
+            try {
+                const response = await fetch(WEBHOOK_URL);
+                const data = await response.json();
+                
+                if (Array.isArray(data)) {
+                    allStudents = data;
+                } else {
+                    allStudents = [data];
+                }
+                
+                updateStats();
+                console.log('تم تحميل', allStudents.length, 'طالب');
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                showError('حدث خطأ في الاتصال بالخادم. تأكد من اتصال الإنترنت.');
+            }
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            document.getElementById('totalStudents').textContent = allStudents.length;
+            
+            const uniqueClasses = new Set(allStudents.map(s => s['الصف']));
+            document.getElementById('totalClasses').textContent = uniqueClasses.size;
+        }
+
+        // الاستماع للكتابة في صندوق البحث
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(suggestionsTimeout);
+            
+            const value = e.target.value.trim();
+            
+            if (value.length < 1) {
+                hideSuggestions();
+                return;
+            }
+            
+            suggestionsTimeout = setTimeout(() => {
+                showSuggestions(value);
+            }, 200);
+        });
+
+        // إخفاء الاقتراحات عند الضغط خارجها
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-wrapper')) {
+                hideSuggestions();
+            }
+        });
+
+        // إظهار الاقتراحات
+        function showSuggestions(searchTerm) {
+            const suggestionsDiv = document.getElementById('suggestions');
+            
+            if (allStudents.length === 0) {
+                return;
+            }
+
+            const matches = allStudents.filter(student => {
+                const name = (student['اسم الطالب'] || '').toLowerCase();
+                const id = (student['رقم الطالب'] || '').toString();
+                const search = searchTerm.toLowerCase();
+                
+                return name.includes(search) || id.includes(search);
+            }).slice(0, 5); // أول 5 نتائج فقط
+
+            if (matches.length === 0) {
+                hideSuggestions();
+                return;
+            }
+
+            suggestionsDiv.innerHTML = '';
+            
+            matches.forEach(student => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.innerHTML = `
+                    <div>
+                        <div class="suggestion-name">${student['اسم الطالب'] || 'غير متوفر'}</div>
+                        <div class="suggestion-details">${student['الصف'] || ''} - ${student['الفصل'] || ''}</div>
+                    </div>
+                    <div class="suggestion-id">#${student['رقم الطالب'] || ''}</div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    searchInput.value = student['اسم الطالب'];
+                    hideSuggestions();
+                    searchStudent();
+                });
+                
+                suggestionsDiv.appendChild(item);
+            });
+            
+            suggestionsDiv.style.display = 'block';
+        }
+
+        function hideSuggestions() {
+            document.getElementById('suggestions').style.display = 'none';
+        }
+
+        // البحث عند الضغط على Enter
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                hideSuggestions();
+                searchStudent();
+            }
+        });
+
+        async function searchStudent() {
+            const searchTerm = searchInput.value.trim();
+            
+            if (!searchTerm) {
+                showError('من فضلك أدخل اسم الطالب أو رقم الطالب');
+                return;
+            }
+
+            hideAll();
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                if (allStudents.length === 0) {
+                    await loadAllStudents();
+                }
+
+                const results = allStudents.filter(student => {
+                    const name = (student['اسم الطالب'] || '').toLowerCase();
+                    const id = (student['رقم الطالب'] || '').toString();
+                    const search = searchTerm.toLowerCase();
+                    
+                    return name.includes(search) || id.includes(search);
+                });
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (results.length > 0) {
+                    displayResults(results);
+                } else {
+                    document.getElementById('noResults').style.display = 'block';
+                }
+
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                showError('حدث خطأ أثناء البحث. حاول مرة أخرى.');
+                console.error('خطأ:', error);
+            }
+        }
+
+        function displayResults(students) {
+            const resultsDiv = document.getElementById('results');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            resultsCount.textContent = `تم العثور على ${students.length} نتيجة`;
+            resultsContainer.innerHTML = '';
+            
+            students.forEach(student => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <div class="student-header">
+                        <div class="student-name">${student['اسم الطالب'] || 'غير متوفر'}</div>
+                        <div class="student-id-badge">رقم ${student['رقم الطالب'] || 'غير متوفر'}</div>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">الصف الدراسي</span>
+                            <span class="info-value">${student['الصف'] || 'غير متوفر'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">رقم الصف</span>
+                            <span class="info-value">${student['رقم الصف'] || 'غير متوفر'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">الفصل الدراسي</span>
+                            <span class="info-value">${student['الفصل'] || 'غير متوفر'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">رقم الجوال</span>
+                            <span class="info-value">${student['الجوال'] || 'غير متوفر'}</span>
+                        </div>
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 4000);
+        }
+
+        function hideAll() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // تحميل البيانات عند فتح الصفحة
+        loadAllStudents();
+    </script>
+</body>
+</html>
