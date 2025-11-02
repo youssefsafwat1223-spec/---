@@ -431,7 +431,7 @@
             <img src="logo.jpg" alt="شعار يُسر" class="logo-image" onerror="this.style.display='none'">
             <div class="header-text-group">
                 <h1>🎓 نظام الاستعلام عن بيانات الطلاب</h1>
-                <p class="header-motto">مبادرة "يُسر" - لأننا نؤمن أن التقنية خُلِقت لتسهّل الحياة</p>
+                <p class="header-motto">مبادرة "يُسر"  لأننا نؤمن أن التقنية خُلِقت لتسهّل الحياة</p>
                 <p class="subtitle">ابحث عن معلومات الطالب بسهولة وسرعة</p>
             </div>
         </div>
@@ -562,8 +562,8 @@
             }
 
             const matches = allStudents.filter(student => {
-                const name = (student['اسم الطالب'] || '').toLowerCase();
-                const id = (student['رقم الطالب'] || '').toString();
+                const name = (student['اسم الطالبة'] || '').toLowerCase();
+                const id = (student['رقم الطالبة'] || '').toString();
                 const search = searchTerm.toLowerCase();
                 
                 return name.includes(search) || id.includes(search);
@@ -581,10 +581,10 @@
                 item.className = 'suggestion-item';
                 item.innerHTML = `
                     <div>
-                        <div class="suggestion-name">${student['اسم الطالب'] || 'غير متوفر'}</div>
+                        <div class="suggestion-name">${student['اسم الطالبة'] || 'غير متوفر'}</div>
                         <div class="suggestion-details">${student['الصف'] || ''} - ${student['الفصل'] || ''}</div>
                     </div>
-                    <div class="suggestion-id">#${student['رقم الطالب'] || ''}</div>
+                    <div class="suggestion-id">#${student['رقم الطالبة'] || ''}</div>
                 `;
                 
                 item.addEventListener('click', () => {
@@ -628,8 +628,8 @@
                 }
 
                 const results = allStudents.filter(student => {
-                    const name = (student['اسم الطالب'] || '').toLowerCase();
-                    const id = (student['رقم الطالب'] || '').toString();
+                    const name = (student['اسم الطالبة'] || '').toLowerCase();
+                    const id = (student['رقم الطالبة'] || '').toString();
                     const search = searchTerm.toLowerCase();
                     
                     return name.includes(search) || id.includes(search);
@@ -708,5 +708,6 @@
     </script>
 </body>
 </html>
+
 
 
